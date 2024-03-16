@@ -31,10 +31,9 @@ growth_nov17$total_lf <- growth_nov17$prim_lf_nov17 + growth_nov17$sec_lf_nov17
 growth_dec1$total_lf <- growth_dec1$prim_lf_dec1 + growth_dec1$sec_lf_dec1
 growth_dec15$total_lf <- growth_dec15$prim_lf_dec15 + growth_dec15$sec_lf_dec15
 
-ggplot(data=growth_nov17, aes(x=trt,y=total_lf))+
+ggplot(data=growth_nov17, aes(x=trt,y=prim_lf_nov17))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
   geom_point(colour="darkslategrey")
-#long trt data not uploaded yet!!
 
 ggplot(data=growth_dec1, aes(x=trt,y=prim_lf_dec1))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
