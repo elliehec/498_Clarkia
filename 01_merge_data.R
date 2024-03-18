@@ -27,29 +27,39 @@ growth_dec15$trt <- with(growth_dec15, ifelse(trt_temp == "cool" & trt_length ==
 
 #early-growth measurements & stats
 #sum prim & sec leaf counts
-growth_nov17$total_lf <- growth_nov17$prim_lf_nov17 + growth_nov17$sec_lf_nov17
+
+# Checking where NAs are in dataframes
+table(growth_nov17$sec_lf_nov17, growth_nov17$prim_lf_nov17, useNA = "ifany")
+table(growth_dec1$sec_lf_dec1, growth_dec1$prim_lf_dec1, useNA = "ifany") 
+# Dec 1 has more NAs than expected in the secondary leaves column
+table(growth_dec15$sec_lf_dec15, growth_dec15$prim_lf_dec15, useNA = "ifany")
+
+summary(growth_nov17)
+growth_nov17$total_lf <- growth_nov17$prim_lf_nov17 + na.rm(growth_nov17$sec_lf_nov17)
 growth_dec1$total_lf <- growth_dec1$prim_lf_dec1 + growth_dec1$sec_lf_dec1
 growth_dec15$total_lf <- growth_dec15$prim_lf_dec15 + growth_dec15$sec_lf_dec15
 
 ggplot(data=growth_nov17, aes(x=trt,y=prim_lf_nov17))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
-  geom_point(colour="darkslategrey")
+  geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3)
 
 ggplot(data=growth_dec1, aes(x=trt,y=prim_lf_dec1))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
-  geom_point(colour="darkslategrey")+
-  geom_point(data=growth_dec1, aes(x=trt, y=sec_lf_dec1), colour="pink")
+  # geom_point(colour="darkslategrey")+
+  geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) #+
+  # geom_point(data=growth_dec1, aes(x=trt, y=sec_lf_dec1), colour="pink")
 
 ggplot(data=growth_dec1, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
-  geom_point(colour="darkslategrey")
+  geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) 
 #get v diff plot when using TOTAL_LF (sum of prim & sec)
 
 ggplot(data=growth_dec15, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
-  geom_point(colour="darkslategrey")+
+  geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) +
   geom_point(data=growth_dec15, aes(x=trt, y=sec_lf_dec15), colour="pink")+
   scale_colour_manual(values = c("darkslategrey" = "Primary Leaves", "pink" = "Secondary Leaves"))+
+  # MB: the reason the legend isn't appearing is because the leaf values aren't in the same columns. It's kind of a technical thing but the legend only generates when you have a column with multiple factor levels in it. I don't think that displaying the primary and secondary leaves on top of each other like this is the best way to visualize them. Just doing total leaves is probably good, or doing prim and sec on separate plots.
   labs(colour = "Leaf Type")
 ggsave("dec15 growth.pdf", width=15, height=15)
 
