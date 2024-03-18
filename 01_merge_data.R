@@ -53,7 +53,6 @@ ggplot(data=growth_dec1, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
   geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) 
 #get v diff plot when using TOTAL_LF (sum of prim & sec)
-#a lot less points for the long trt groups?
 
 ggplot(data=growth_dec15, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
