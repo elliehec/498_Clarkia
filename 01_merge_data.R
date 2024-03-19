@@ -54,6 +54,7 @@ ggplot(data=growth_dec1, aes(x=trt,y=total_lf))+
   geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) 
 #get v diff plot when using TOTAL_LF (sum of prim & sec)
 
+
 ggplot(data=growth_dec15, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
   geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) +
@@ -150,8 +151,8 @@ ggplot(data = all_data, aes(x=trt, y=nodes_to_fr_flwr, fill=trt)) +
 
 ggplot(data = all_data, aes(x=trt, y=flwr_date_rel, fill=trt)) +
   geom_boxplot(alpha=0.3)+
-  geom_jitter()+
-  facet_wrap(.~pop)
+  geom_jitter()
+  #facet_wrap(.~pop)
 ggsave("flwr date by trt.pdf", width=5, height=5)
 
 ggplot(data = all_data, aes(x=trt_length, y=flwr_date_rel)) +
@@ -181,17 +182,18 @@ gggeom_boxplot()ggplot(data = all_data, aes(x=pop, y=area_pt, fill=trt)) +
 
 
 
-#continous plot
+#continous plots
 ggplot(data = all_data, aes(x=flwr_date_num, y=height_to_fr_flwr, colour=pop))+
   geom_point()+
   geom_smooth(method = "lm")+
   facet_wrap(.~trt, scales = "free_x")
 ggsave("flwr date by height to fr flwr.pdf", width=5, height=5)
 
-ggplot(data=all_data, aes(x=flwr_date_num, y=total_biomass, fill=trt_temp, colour=trt_temp))+
-  geom_point()+
-  geom_smooth(method = "lm")
-ggsave("flwr date by total biomass.pdf", width=5, height=5)
+#going to use this plot for poster:
+ggplot(data=all_data, aes(x=flwr_date_num, y=total_biomass, fill=trt, colour=trt))+
+  geom_point(alpha=0.7)+
+  geom_smooth(alpha = 0.25, method = "lm")
+ggsave("flwr date by total biomass.pdf", width=10, height=10)
 
 
 ggplot(data=all_data, aes(x=flwr_date_num, y=area_lf, fill=trt_temp, colour=trt_temp))+
@@ -207,6 +209,32 @@ ggplot(data=all_data, aes(x=total_biomass, y=flwr_date_num, fill=trt, colour=trt
 ggsave("flwr date by petal area.pdf", width=5, height=5)
 
 
+#correlation tests for size variables
+cor.test(all_data$height_to_fr_flwr, all_data$total_biomass)
+#0.6344888, p-value < 2.2e-16
+#>0.8 high cor
+
+cor.test(all_data$height_to_fr_flwr, all_data$nodes_to_fr_flwr)
+#0.6555295, p-value < 2.2e-16
+
+cor.test(all_data$height_to_fr_flwr, all_data$total_above)
+#0.7034283, p-value < 2.2e-16
+
+cor.test(all_data$height_to_fr_flwr, all_data$below)
+#0.4792803, p-value < 2.2e-16
+
+cor.test(all_data$nodes_to_fr_flwr, all_data$total_biomass)
+#0.5245244, p-value < 2.2e-16
+
+cor.test(all_data$total_biomass, all_data$area_pt) #lf same
+#0.7362933, p-value < 2.2e-16
+
+cor.test(all_data$below, all_data$total_biomass)
+
+
+
+
+
 
 
 #models
@@ -218,6 +246,17 @@ m2 <- lmer(data = all_data, flwr_date_num ~ trt_length*trt_temp +(1|pop))
 summary(m2)
 
 plot(ggpredict(m2, terms = c("trt_length", "trt_temp")))
+p2 <- ggpredict(m2, terms = c("trt_length", "trt_temp")) %>%
+  mutate(trt=str_c(x, group, sep = "_")) %>%
+  filter(!(is.na(x)))
+
+ggplot(data = all_data, aes(x=trt, y=flwr_date_num)) +
+  geom_boxplot(aes(fill=trt))+
+  geom_jitter(alpha=0.4)+
+  geom_pointrange(data=p2, aes(x=trt, y=predicted, ymax=conf.high, ymin=conf.low))+
+  scale_fill_manual(values = c("long_cool" = "steelblue", "long_warm" = "tomato3", "short_cool" = "steelblue1", "short_warm" = "coral"))
+ggsave("trt by flwr date num with model prediction.pdf", width=10, height=10)
+#shows variation in data & model data
 
 m4 <- lmer(data = all_data, above_veg ~ flwr_date_rel +(1|pop))
 summary(m4)
@@ -245,7 +284,8 @@ m7 <- lmer(data = all_data, nodes_to_fr_flwr ~ flwr_date_num*trt +(1|pop))
 summary(m7)
 #some sig
 
-
+m8 <- lmer(data = growth_nov17, total_lf ~ trt_length*trt_temp +(1|pop))
+summary(m8)
 
 
 
