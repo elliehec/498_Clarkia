@@ -53,6 +53,7 @@ ggplot(data=growth_dec1, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
   geom_jitter(colour="darkslategrey", width = 0.1, height = 0.1, alpha = 0.3) 
 #get v diff plot when using TOTAL_LF (sum of prim & sec)
+#a lot less points for the long trt groups?
 
 ggplot(data=growth_dec15, aes(x=trt,y=total_lf))+
   geom_boxplot(alpha=0.3, colour = "khaki4")+
@@ -110,6 +111,13 @@ all_data$trt <- with(all_data, ifelse(trt_temp == "cool" & trt_length == "short"
                                 ifelse(trt_temp == "cool" & trt_length == "long", "long_cool",
                                        ifelse(trt_temp == "warm" & trt_length == "short", "short_warm", "long_warm"))))
 
+#make flwr date column & height to first flwr numeric columns! (removes "days" and converts
+#NULL to NA)
+all_data$flwr_date_num <- as.numeric(all_data$flwr_date_rel)
+all_data$height_to_fr_flwr <- as.numeric(all_data$height_to_fr_flwr)
+all_data$height_to_fr_flwr <- sapply(all_data$height_to_fr_flwr, as.numeric)
+all_data$height_to_fr_flwr <- lapply(all_data$height_to_fr_flwr, function(x) as.numeric(as.character(x)))
+
 
 
 #checking data upload
@@ -119,49 +127,85 @@ c1 <- all_data %>%
 
 summary(all_data)
 
-#histograms
-ggplot(data = all_data, aes(x=trt, y=flwr_date_rel)) +
-  geom_boxplot()
+
+
+#boxplots
+ggplot(data = all_data, aes(x=trt, y=flwr_date_rel, fill=trt)) +
+  geom_boxplot(alpha = 0.3)+
+  geom_jitter()+
+  facet_wrap(.~pop)
 #cool trt flowered latest, long trt flwr later than short
 
-ggplot(data = all_data, aes(x=trt, y=height_to_fr_flwr)) +
-  geom_boxplot()
-#height is almost the same for all trt groups
+ggplot(data = all_data, aes(x=trt, y=height_to_fr_flwr, fill=trt)) +
+  geom_boxplot(alpha = 0.3)+
+  geom_jitter()+
+  facet_wrap(.~pop)
+#height is almost the same for all trt
+#see a DIFF based on the pop, but each pop is roughly the same across trt
 
-ggplot(data = all_data, aes(x=trt, y=nodes_to_fr_flwr)) +
-  geom_boxplot()
-#short warm have more nodes??
-
-ggplot(data = all_data, aes(x=trt, y=area_lf)) +
-  geom_boxplot()
+ggplot(data = all_data, aes(x=trt, y=nodes_to_fr_flwr, fill=trt)) +
+  geom_boxplot(alpha = 0.3)+
+  geom_jitter()+
+  facet_wrap(.~pop)
+#doesn't seem that useful?
 
 ggplot(data = all_data, aes(x=trt, y=flwr_date_rel, fill=trt)) +
-  geom_boxplot()+
+  geom_boxplot(alpha=0.3)+
+  geom_jitter()+
   facet_wrap(.~pop)
 ggsave("flwr date by trt.pdf", width=5, height=5)
+
+ggplot(data = all_data, aes(x=trt_length, y=flwr_date_rel)) +
+  geom_boxplot(alpha=0.3)+
+  geom_jitter()+
+  facet_wrap(.~pop)
+#JCP is the only pop where short flwr LATER than long
+
+ggplot(data = all_data, aes(x=trt_temp, y=flwr_date_rel)) +
+  geom_boxplot(alpha=0.3)+
+  geom_jitter()+
+  facet_wrap(.~pop)
+#BFF is the only pop where warm flwr LATER than cool
 
 ggplot(data = all_data, aes(x=trt, y=below, fill=trt)) +
   geom_boxplot()+
   facet_wrap(.~pop, scales = "free_y")
 #ggsave("flwr date by trt.pdf", width=5, height=5)
 
-ggplot(data=all_data, aes(x=flwr_date_rel, y=below, fill=trt, colour=trt))+
-  geom_point()+
-  geom_smooth(method = "lm")
-  #facet_wrap(.~pop, scales = "free_y")
-
-ggplot(data=all_data, aes(x=trt, y=below))+
-  geom_boxplot()
-
 gggeom_boxplot()ggplot(data = all_data, aes(x=pop, y=area_pt, fill=trt)) +
   geom_boxplot()
 
+
+
+
+
+
+
+
 #continous plot
+ggplot(data = all_data, aes(x=flwr_date_num, y=height_to_fr_flwr, colour=pop))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  facet_wrap(.~trt, scales = "free_x")
+ggsave("flwr date by height to fr flwr.pdf", width=5, height=5)
 
-ggplot(data = all_data, aes(x=flwr_date_rel, y=height_to_fr_flwr, colour=trt))+
-  geom_point()
+ggplot(data=all_data, aes(x=flwr_date_num, y=total_biomass, fill=trt_temp, colour=trt_temp))+
+  geom_point()+
+  geom_smooth(method = "lm")
+ggsave("flwr date by total biomass.pdf", width=5, height=5)
 
-all_data$flwr_date_num <- as.numeric(all_data$flwr_date_rel)
+
+ggplot(data=all_data, aes(x=flwr_date_num, y=area_lf, fill=trt_temp, colour=trt_temp))+
+  geom_point()+
+  geom_smooth(method = "lm")
+  #facet_wrap(.~pop, scales = "free_x")
+ggsave("flwr date by leaf area.pdf", width=5, height=5)
+
+ggplot(data=all_data, aes(x=total_biomass, y=flwr_date_num, fill=trt, colour=trt))+
+  geom_point()+
+  geom_smooth(method = "lm")
+  #facet_wrap(.~pop, scales = "free_x")
+ggsave("flwr date by petal area.pdf", width=5, height=5)
 
 
 
@@ -188,6 +232,22 @@ plot(ggpredict(m4))
 
 tools::package_dependencies("Matrix", which = "LinkingTo", reverse = TRUE)[[1L]]
 install.packages("lme4", type = "source")
+
+m5 <- lmer(data = all_data, total_biomass ~ flwr_date_num +(1|pop))
+summary(m5)
+#significant
+#adding "*trt" and fewer things are sig
+
+m6 <- lmer(data = all_data, height_to_fr_flwr ~ flwr_date_num*trt +(1|pop))
+summary(m6)
+#significant
+
+m7 <- lmer(data = all_data, nodes_to_fr_flwr ~ flwr_date_num*trt +(1|pop))
+summary(m7)
+#some sig
+
+
+
 
 
 
